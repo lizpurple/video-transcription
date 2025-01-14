@@ -28,7 +28,7 @@ EXPOSE 8501
 
 COPY . .
 
-CMD ["streamlit", "run", "streamlit_app.py"]
+CMD ["streamlit", "run", "srt.py"]
 
 # docker build --progress=plain --tag pydub:latest .
 # docker run -ti -p 8501:8501 --rm pydub:latest /bin/bash
