@@ -34,10 +34,10 @@ def process_video_url(video_url):
             # Store the subtitle text in session state so it persists across reruns
             st.session_state.srt_text = srt
 
-            # Display the cleaned subtitle text in a text_area
+            # Display the cleaned subtitle text in a text_area widget (no duplicate)
             st.text_area("Legendas Processadas", srt, height=300)
 
-            # Add a copy button with custom JavaScript
+            # Add a copy button with custom JavaScript for clipboard functionality
             st.markdown(
                 f"""
                 <button onclick="copyTextToClipboard()" style="background-color:#4CAF50; color:white; padding:5px 10px; border:none; cursor:pointer;">
