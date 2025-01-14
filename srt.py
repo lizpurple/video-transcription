@@ -1,58 +1,66 @@
-import streamlit as st
-import subprocess
-import os
+import imageio
 import re
+import streamlit as st
 
-# Title of the web app
-st.title("Transcrição de Vídeo por Arquivo SRT")
+# Function to process the video URL and extract subtitles
+def process_video_url(video_url):
+    try:
+        # Use imageio to download the video and extract metadata
+        reader = imageio.get_reader(video_url)
+        metadata = reader.get_meta_data()
 
-# Create a text input widget for the video URL
-video_url = st.text_input("Cole o link do vídeo aqui")
+        # Assuming subtitles are embedded in the metadata (adjust based on the file format)
+        if 'subtitles' in metadata:
+            srt = metadata['subtitles']
+            
+            # Process the SRT text
+            srt = re.sub(r'<.+?>', '', srt)
+            srt = re.sub(r'{.+?}', '', srt)
+            srt = re.sub(r'^\d+\n\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+\n', '', srt, flags=re.M)
+            srt = re.sub('\n', ' ', srt)
+            srt = re.sub(r' ‏', ' ', srt)
+            srt = re.sub(r'  ', ' ', srt)
+            srt = re.sub(r'\. ', '.\n\n', srt)
+            srt = re.sub(r'\? ', '?\n\n', srt)
+            srt = re.sub(r'\.” ', '.”\n\n', srt)
+            srt = re.sub('  ', ' ', srt)
+            srt = re.sub(r'\.\n\n\.\n\n\.\n\n', '. . . ', srt)
+            srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
+            srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
 
-# Create a button to process the URL
+            # Create HTML content with the formatted subtitle text
+            html_content = f"""
+            <div style="white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; line-height: 1.5; padding: 10px;">
+            {srt}
+            </div>
+            <button id="copy-button" style="background-color:#4CAF50; color:white; padding:5px 10px; border:none; cursor:pointer;">
+            Copy Text
+            </button>
+            <textarea id="copy-text" style="display:none;">{srt}</textarea>
+            <script>
+            document.querySelector("#copy-button").addEventListener("click", function() {{
+                var copyText = document.querySelector("#copy-text");
+                copyText.style.display = "block";
+                copyText.select();
+                document.execCommand("copy");
+                copyText.style.display = "none";
+                alert("Text copied to clipboard!");
+            }});
+            </script>
+            """
+            st.markdown(html_content, unsafe_allow_html=True)
+        else:
+            st.error("Este vídeo não possui um arquivo de legendas.")
+    
+    except Exception as e:
+        st.error(f"Ocorreu um erro: {e}")
+
+# Streamlit UI elements
+st.title('Transcrição de Vídeo com Subtítulos')
+video_url = st.text_input('Cole o link do vídeo aqui:')
+
 if st.button("Transcrever o vídeo"):
-    if not video_url:
-        st.error("O link é inválido.")
+    if video_url:
+        process_video_url(video_url)
     else:
-        try:
-            # Download the subtitles using ffmpeg
-            subprocess.run(['ffmpeg', '-i', video_url, '-y', '/content/sub.srt'], check=True)
-
-            # Check if the subtitle file exists
-            if os.path.exists('/content/sub.srt'):
-                # Read and process the SRT file
-                with open('/content/sub.srt', 'r') as input_file:
-                    srt = input_file.read()
-
-                # Remove tags and unwanted content
-                srt = re.sub(r'<.+?>', '', srt)
-                srt = re.sub(r'{.+?}', '', srt)
-                srt = re.sub(r'^\d+\n\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+\n', '', srt, flags=re.M)
-                srt = re.sub('\n', ' ', srt)
-                srt = re.sub(r' ‏', ' ', srt)
-                srt = re.sub(r'  ', ' ', srt)
-                srt = re.sub(r'\. ', '.\n\n', srt)
-                srt = re.sub(r'\? ', '?\n\n', srt)
-                srt = re.sub(r'\.” ', '.”\n\n', srt)
-                srt = re.sub('  ', ' ', srt)
-                srt = re.sub(r'\.\n\n\.\n\n\.\n\n', '. . . ', srt)
-                srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
-                srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
-
-                # Display the processed SRT text
-                st.text_area("Texto transcrito", srt, height=300)
-
-                # Provide a copy button for users
-                st.download_button(
-                    label="Copiar Transcrição",
-                    data=srt,
-                    file_name="transcription.txt",
-                    mime="text/plain"
-                )
-
-                # Clean up
-                os.remove('/content/sub.srt')
-            else:
-                st.error("Este vídeo não possui um arquivo de legendas.")
-        except Exception as e:
-            st.error(f"Ocorreu um erro: {e}")
+        st.warning("Por favor, insira o link do vídeo.")
