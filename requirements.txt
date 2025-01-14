@@ -1,4 +1,2 @@
-ipywidgets
-ffmpeg
+ffmpeg-python
 streamlit
-imageio[ffmpeg]
