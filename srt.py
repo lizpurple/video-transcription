@@ -8,8 +8,7 @@ def process_video_url(video_url):
     try:
         # Download the subtitles using ffmpeg
         output_path = '/tmp/sub.srt'
-        ffmpeg.input(video_url).output(output_path, vn=None, **{'scodec': 'srt'}).run()
-
+        ffmpeg.input(video_url).output(output_path, vn=None, **{'scodec': 'srt'}).overwrite_output().run()
         # Check if the subtitle file exists
         if os.path.exists(output_path):
             # Read and process the SRT file
