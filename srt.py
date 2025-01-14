@@ -32,13 +32,11 @@ def process_video_url(video_url):
             srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
             srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
 
+            # Store the subtitle text in session state so it persists across reruns
+            st.session_state.srt_text = srt
+
             # Display the cleaned subtitle text in a text_area
             st.text_area("Legendas Processadas", srt, height=300)
-
-            # Streamlit button for copying the text to clipboard
-            if st.button("Copiar texto"):
-                pyperclip.copy(srt)  # Copies the subtitle text to the clipboard
-                st.success("Texto copiado para a área de transferência!")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
@@ -55,3 +53,9 @@ if st.button("Transcrever o vídeo"):
         process_video_url(video_url)
     else:
         st.warning("Por favor, insira o link do vídeo.")
+
+# Button to copy text to clipboard
+if 'srt_text' in st.session_state:
+    if st.button("Copiar texto"):
+        pyperclip.copy(st.session_state.srt_text)  # Copy the subtitle text to clipboard
+        st.success("Texto copiado para a área de transferência!")
