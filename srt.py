@@ -45,7 +45,7 @@ def process_video_url(video_url):
 
 # Streamlit UI elements
 st.title('Transcrição de Vídeos')
-video_url = st.text_input('Cole o link do vídeo aqui:')
+video_url = st.text_input('Cole o link de download do vídeo aqui:')
 
 if st.button("Transcrever o vídeo"):
     if video_url:
