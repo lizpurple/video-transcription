@@ -1,5 +1,6 @@
 import ffmpeg
 import re
+import os
 import streamlit as st
 
 # Function to process the video URL and extract subtitles using ffmpeg-python
