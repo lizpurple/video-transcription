@@ -2,7 +2,7 @@ import ffmpeg
 import re
 import os
 import streamlit as st
-import pyperclip  # You may need to install this library for clipboard operations
+import pyperclip  # For clipboard operations
 
 # Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
@@ -10,6 +10,7 @@ def process_video_url(video_url):
         # Download the subtitles using ffmpeg
         output_path = '/tmp/sub.srt'
         ffmpeg.input(video_url).output(output_path, vn=None, **{'scodec': 'srt'}).overwrite_output().run()
+        
         # Check if the subtitle file exists
         if os.path.exists(output_path):
             # Read and process the SRT file
@@ -31,8 +32,8 @@ def process_video_url(video_url):
             srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
             srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
 
-            # Display the cleaned subtitles
-            st.markdown(f"<div style='white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; line-height: 1.5; padding: 10px;'>{srt}</div>", unsafe_allow_html=True)
+            # Display the cleaned subtitle text in a text_area
+            st.text_area("Legendas Processadas", srt, height=300)
 
             # Streamlit button for copying the text to clipboard
             if st.button("Copiar texto"):
