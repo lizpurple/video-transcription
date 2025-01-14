@@ -39,7 +39,7 @@ def process_video_url(video_url):
             st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
 
             # Render copy to clipboard button
-            st_copy_to_clipboard("Copiar Texto")
+            st_copy_to_clipboard(st.session_state.srt_text, label="Copiar Texto")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
