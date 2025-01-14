@@ -1,19 +1,21 @@
-import imageio
+import ffmpeg
 import re
 import streamlit as st
 
-# Function to process the video URL and extract subtitles
+# Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
     try:
-        # Use imageio to download the video and extract metadata
-        reader = imageio.get_reader(video_url)
-        metadata = reader.get_meta_data()
+        # Download the subtitles using ffmpeg
+        output_path = '/tmp/sub.srt'
+        ffmpeg.input(video_url).output(output_path, vn=None, **{'scodec': 'srt'}).run()
 
-        # Assuming subtitles are embedded in the metadata (adjust based on the file format)
-        if 'subtitles' in metadata:
-            srt = metadata['subtitles']
-            
-            # Process the SRT text
+        # Check if the subtitle file exists
+        if os.path.exists(output_path):
+            # Read and process the SRT file
+            with open(output_path, 'r') as input_file:
+                srt = input_file.read()
+
+            # Process the SRT content to clean it up
             srt = re.sub(r'<.+?>', '', srt)
             srt = re.sub(r'{.+?}', '', srt)
             srt = re.sub(r'^\d+\n\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+\n', '', srt, flags=re.M)
@@ -49,6 +51,7 @@ def process_video_url(video_url):
             </script>
             """
             st.markdown(html_content, unsafe_allow_html=True)
+
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
     
