@@ -34,23 +34,22 @@ def process_video_url(video_url):
             # Store the subtitle text in session state so it persists across reruns
             st.session_state.srt_text = srt
 
-            # Display the cleaned subtitle text in a text_area widget (no duplicate)
-            st.text_area("Legendas Processadas", srt, height=300)
+            # Display the cleaned subtitle text in a text_area widget with updated title
+            st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
 
-            # Check if button has already been clicked
-            if 'clicked' not in st.session_state:
-                st.session_state.clicked = False
+            # Check if the "Transcrever o Vídeo" button has already been clicked
+            if 'transcribed' not in st.session_state:
+                st.session_state.transcribed = False
 
-            def copy_text():
-                # Copy the subtitle text to clipboard (could implement pyperclip or use JS)
-                st.session_state.clicked = True  # Mark button as clicked
+            def transcribe_video():
+                st.session_state.transcribed = True  # Mark the video as transcribed
 
-            # Add a Streamlit button
-            st.button('Copiar texto', on_click=copy_text)
+            # Add a Streamlit button for transcribing the video (this button will stay clicked)
+            st.button('Transcrever o Vídeo', on_click=transcribe_video)
 
-            # After the button is clicked, show that the action was successful
-            if st.session_state.clicked:
-                st.write("Texto copiado!")
+            # If the video was transcribed, show the success message
+            if st.session_state.transcribed:
+                st.write("Vídeo transcrito com sucesso!")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
