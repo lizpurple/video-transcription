@@ -59,7 +59,7 @@ def process_video_url(video_url):
         st.error(f"Ocorreu um erro: {e}")
 
 # Streamlit UI elements
-st.title('Transcrição de Vídeo com Subtítulos')
+st.title('Transcrição de Vídeos')
 video_url = st.text_input('Cole o link do vídeo aqui:')
 
 if st.button("Transcrever o vídeo"):
