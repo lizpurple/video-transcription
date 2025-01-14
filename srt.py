@@ -35,7 +35,7 @@ def process_video_url(video_url):
             st.session_state.srt_text = srt
 
             # Display the cleaned subtitle text in a text_area widget (no duplicate)
-            st.text_area("Legendas Processadas", srt, height=300)
+            st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
 
             # Add a copy button with custom JavaScript for clipboard functionality
             st.markdown(
