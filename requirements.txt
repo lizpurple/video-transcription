@@ -1,3 +1,4 @@
 ipywidgets
 ffmpeg
 streamlit
+imageio[ffmpeg]
