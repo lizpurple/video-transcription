@@ -2,6 +2,7 @@ import ffmpeg
 import re
 import os
 import streamlit as st
+from st_copy_to_clipboard import st_copy_to_clipboard
 
 # Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
@@ -36,6 +37,9 @@ def process_video_url(video_url):
 
             # Display the cleaned subtitle text in a text_area widget with updated title
             st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
+
+            # Render copy to clipboard button
+            st_copy_to_clipboard("Copiar Texto")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
