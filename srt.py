@@ -2,7 +2,6 @@ import ffmpeg
 import re
 import os
 import streamlit as st
-import pyperclip  # For clipboard operations
 
 # Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
@@ -38,6 +37,25 @@ def process_video_url(video_url):
             # Display the cleaned subtitle text in a text_area
             st.text_area("Legendas Processadas", srt, height=300)
 
+            # Add a copy button with custom JavaScript
+            st.markdown(
+                f"""
+                <button onclick="copyTextToClipboard()" style="background-color:#4CAF50; color:white; padding:5px 10px; border:none; cursor:pointer;">
+                    Copiar texto
+                </button>
+                <textarea id="copy-text" style="display:none;">{srt}</textarea>
+                <script>
+                function copyTextToClipboard() {{
+                    var copyText = document.getElementById("copy-text");
+                    copyText.style.display = "block";
+                    copyText.select();
+                    document.execCommand("copy");
+                    copyText.style.display = "none";
+                    alert("Texto copiado para a área de transferência!");
+                }}
+                </script>
+                """, unsafe_allow_html=True)
+
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
     
@@ -53,9 +71,3 @@ if st.button("Transcrever o vídeo"):
         process_video_url(video_url)
     else:
         st.warning("Por favor, insira o link do vídeo.")
-
-# Button to copy text to clipboard
-if 'srt_text' in st.session_state:
-    if st.button("Copiar texto"):
-        pyperclip.copy(st.session_state.srt_text)  # Copy the subtitle text to clipboard
-        st.success("Texto copiado para a área de transferência!")
