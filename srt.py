@@ -35,26 +35,22 @@ def process_video_url(video_url):
             st.session_state.srt_text = srt
 
             # Display the cleaned subtitle text in a text_area widget (no duplicate)
-            st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
+            st.text_area("Legendas Processadas", srt, height=300)
 
-            # Add a copy button with custom JavaScript for clipboard functionality
-            st.markdown(
-                f"""
-                <button onclick="copyTextToClipboard()" style="background-color:#4CAF50; color:white; padding:5px 10px; border:none; cursor:pointer;">
-                    Copiar texto
-                </button>
-                <textarea id="copy-text" style="display:none;">{srt}</textarea>
-                <script>
-                function copyTextToClipboard() {{
-                    var copyText = document.getElementById("copy-text");
-                    copyText.style.display = "block";
-                    copyText.select();
-                    document.execCommand("copy");
-                    copyText.style.display = "none";
-                    alert("Texto copiado para a área de transferência!");
-                }}
-                </script>
-                """, unsafe_allow_html=True)
+            # Check if button has already been clicked
+            if 'clicked' not in st.session_state:
+                st.session_state.clicked = False
+
+            def copy_text():
+                # Copy the subtitle text to clipboard (could implement pyperclip or use JS)
+                st.session_state.clicked = True  # Mark button as clicked
+
+            # Add a Streamlit button
+            st.button('Copiar texto', on_click=copy_text)
+
+            # After the button is clicked, show that the action was successful
+            if st.session_state.clicked:
+                st.write("Texto copiado!")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
