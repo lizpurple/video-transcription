@@ -9,7 +9,7 @@ def process_video_url(video_url):
         # Download the subtitles using ffmpeg
         output_path = '/tmp/sub.srt'
         ffmpeg.input(video_url).output(output_path, vn=None, **{'scodec': 'srt'}).overwrite_output().run()
-        
+
         # Check if the subtitle file exists
         if os.path.exists(output_path):
             # Read and process the SRT file
@@ -36,20 +36,6 @@ def process_video_url(video_url):
 
             # Display the cleaned subtitle text in a text_area widget with updated title
             st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
-
-            # Check if the "Transcrever o Vídeo" button has already been clicked
-            if 'transcribed' not in st.session_state:
-                st.session_state.transcribed = False
-
-            def transcribe_video():
-                st.session_state.transcribed = True  # Mark the video as transcribed
-
-            # Add a Streamlit button for transcribing the video (this button will stay clicked)
-            st.button('Transcrever o Vídeo', on_click=transcribe_video)
-
-            # If the video was transcribed, show the success message
-            if st.session_state.transcribed:
-                st.write("Vídeo transcrito com sucesso!")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
