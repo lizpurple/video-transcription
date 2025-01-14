@@ -2,6 +2,7 @@ import ffmpeg
 import re
 import os
 import streamlit as st
+import pyperclip  # You may need to install this library for clipboard operations
 
 # Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
@@ -30,27 +31,13 @@ def process_video_url(video_url):
             srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
             srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
 
-            # Create HTML content with the formatted subtitle text
-            html_content = f"""
-            <div style="white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; line-height: 1.5; padding: 10px;">
-            {srt}
-            </div>
-            <button id="copy-button" style="background-color:#4CAF50; color:white; padding:5px 10px; border:none; cursor:pointer;">
-            Copy Text
-            </button>
-            <textarea id="copy-text" style="display:none;">{srt}</textarea>
-            <script>
-            document.querySelector("#copy-button").addEventListener("click", function() {{
-                var copyText = document.querySelector("#copy-text");
-                copyText.style.display = "block";
-                copyText.select();
-                document.execCommand("copy");
-                copyText.style.display = "none";
-                alert("Text copied to clipboard!");
-            }});
-            </script>
-            """
-            st.markdown(html_content, unsafe_allow_html=True)
+            # Display the cleaned subtitles
+            st.markdown(f"<div style='white-space: pre-wrap; word-wrap: break-word; font-family: Arial, sans-serif; line-height: 1.5; padding: 10px;'>{srt}</div>", unsafe_allow_html=True)
+
+            # Streamlit button for copying the text to clipboard
+            if st.button("Copiar texto"):
+                pyperclip.copy(srt)  # Copies the subtitle text to the clipboard
+                st.success("Texto copiado para a área de transferência!")
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
