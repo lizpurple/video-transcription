@@ -1,7 +1,7 @@
 # Use the official Python slim image
 FROM python:3.9-slim
 
-# Set environment variables to prevent Python from buffering outputs
+# Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -10,7 +10,7 @@ ENV PYTHONUNBUFFERED=1 \
     LC_ALL=C.UTF-8 \
     LANG=C.UTF-8
 
-# Install system dependencies
+# Install system dependencies and Chromium
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
     gcc \
@@ -18,20 +18,21 @@ RUN apt-get update \
     build-essential \
     python3-dev \
     chromium \
-    chromium-driver \  # <-- Install Chromium and its driver
+    wget \
+    curl \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Download and install the ChromeDriver version that matches Chromium
-RUN CHROMIUM_VERSION=$(chromium --version | sed 's/.*[0-9]*\ ?') && \
-    wget https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}.0/chromedriver_linux64.zip && \
+RUN CHROMIUM_VERSION=$(chromium --version | sed 's/.* [0-9]*\..*/\1/') && \
+    wget https://chromedriver.storage.googleapis.com/$CHROMIUM_VERSION.0/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip -d /usr/local/bin && \
     rm chromedriver_linux64.zip
 
 # Set the working directory
 WORKDIR /app
 
-# Copy requirements and install Python dependencies
+# Install Python dependencies
 COPY requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
@@ -42,14 +43,8 @@ RUN xargs -a packages.txt apt-get install --yes
 # Copy the application code
 COPY . .
 
-# Expose the port used by Streamlit
+# Expose the port for Streamlit
 EXPOSE 8501
 
 # Default command to run the Streamlit app
 CMD ["streamlit", "run", "srt.py"]
-
-# Notes for Docker commands
-# docker build --progress=plain --tag pydub:latest .
-# docker run -ti -p 8501:8501 --rm pydub:latest /bin/bash
-# docker run -ti -p 8501:8501 --rm pydub:latest
-# docker run -ti -p 8501:8501 -v ${pwd}:/app --rm pydub:latest
