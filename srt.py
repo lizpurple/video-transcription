@@ -2,45 +2,9 @@ import ffmpeg
 import re
 import os
 import streamlit as st
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
 from st_copy_to_clipboard import st_copy_to_clipboard
-import time
 
-# Function to extract video URL using Selenium
-def extract_video_url(page_url):
-    try:
-        chrome_options = Options()
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument("--disable-gpu")
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-        chrome_options.add_argument("--disable-dev-shm-usage")
-        chrome_options.add_argument("start-maximized")
-
-        service = Service(ChromeDriverManager().install())
-        driver = webdriver.Chrome(service=service, options=chrome_options)
-
-        driver.get(page_url)
-        time.sleep(10)  # Allow time for JavaScript to load
-
-        buttons = driver.find_elements(By.CSS_SELECTOR, 'a.secondaryButton')
-        if buttons:
-            video_url = buttons[0].get_attribute("href")
-        else:
-            video_url = None
-
-        driver.quit()
-        return video_url
-
-    except Exception as e:
-        st.error(f"Error extracting video URL: {e}")
-        return None
-
-# Function to process video URL with FFmpeg
+# Function to process the video URL and extract subtitles using ffmpeg-python
 def process_video_url(video_url):
     try:
         # Download the subtitles using ffmpeg
@@ -49,10 +13,11 @@ def process_video_url(video_url):
 
         # Check if the subtitle file exists
         if os.path.exists(output_path):
+            # Read and process the SRT file
             with open(output_path, 'r') as input_file:
                 srt = input_file.read()
 
-            # Process the SRT content
+            # Process the SRT content to clean it up
             srt = re.sub(r'<.+?>', '', srt)
             srt = re.sub(r'{.+?}', '', srt)
             srt = re.sub(r'^\d+\n\d+:\d+:\d+,\d+ --> \d+:\d+:\d+,\d+\n', '', srt, flags=re.M)
@@ -67,27 +32,27 @@ def process_video_url(video_url):
             srt = re.sub(r'\.\n\n\.\n\n\.”', '. . .”', srt)
             srt = re.sub(r'\.\n\.\n\.\n', '. . . ', srt)
 
-            # Display the cleaned subtitle text
+            # Store the subtitle text in session state so it persists across reruns
             st.session_state.srt_text = srt
+
+            # Display the cleaned subtitle text in a text_area widget with updated title
             st.text_area("Vídeo transcrito com sucesso!", srt, height=300)
+
+            # Render copy to clipboard button
             st_copy_to_clipboard(st.session_state.srt_text)
 
         else:
             st.error("Este vídeo não possui um arquivo de legendas.")
-
+    
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
 
-# Streamlit UI
-st.title('Transcrição de Vídeos com Selenium e FFmpeg')
-page_url = st.text_input('Cole o link da página do vídeo aqui:')
+# Streamlit UI elements
+st.title('Transcrição de Vídeos')
+video_url = st.text_input('Cole o link de download do vídeo aqui:')
 
-if st.button("Extrair e Transcrever"):
-    if page_url:
-        video_url = extract_video_url(page_url)
-        if video_url:
-            process_video_url(video_url)
-        else:
-            st.warning("Não foi possível extrair o URL do vídeo.")
+if st.button("Transcrever o vídeo"):
+    if video_url:
+        process_video_url(video_url)
     else:
-        st.warning("Por favor, insira o link da página.")
+        st.warning("Por favor, insira o link do vídeo.")
