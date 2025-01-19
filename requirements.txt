@@ -1,5 +1,2 @@
 ffmpeg-python
 streamlit
-st_copy_to_clipboard
-selenium
-webdriver-manager
