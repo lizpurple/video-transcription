@@ -3,7 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
+import chromedriver_autoinstaller  # Automatically installs the right ChromeDriver version
 import subprocess
 import os
 import re
@@ -21,20 +21,25 @@ def process():
     if not url:
         return jsonify({'error': 'Por favor, insira um URL válido.'})
 
+    # Install ChromeDriver and configure Chrome options
+    chromedriver_autoinstaller.install()
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument("user-agent=Mozilla/5.0")
     chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("user-agent=Mozilla/5.0")
+    chrome_options.binary_location = "/usr/bin/google-chrome"  # Path to Chrome binary
 
-    service = Service(ChromeDriverManager().install())
+    # Initialize WebDriver
+    service = Service()
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
         driver.get(url)
         driver.implicitly_wait(10)
 
+        # Find video link
         buttons = driver.find_elements(By.CSS_SELECTOR, 'a.secondaryButton')
         if not buttons:
             return jsonify({'error': 'Nenhum vídeo encontrado.'})
@@ -42,7 +47,7 @@ def process():
         video_url = buttons[0].get_attribute("href")
         driver.quit()
 
-        # Use a temp location for subtitles
+        # Extract subtitles using ffmpeg
         output_srt = '/tmp/sub.srt'
         subprocess.run(['ffmpeg', '-i', video_url, '-y', output_srt])
 
