@@ -1,7 +1,5 @@
-# Use the official Python slim image
 FROM python:3.9-slim
 
-# Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -10,42 +8,29 @@ ENV PYTHONUNBUFFERED=1 \
     LC_ALL=C.UTF-8 \
     LANG=C.UTF-8
 
-# Install system dependencies and Chromium
+# we probably need build tools?
 RUN apt-get update \
     && apt-get install --yes --no-install-recommends \
     gcc \
     g++ \
     build-essential \
-    python3-dev \
-    chromium \
-    wget \
-    curl \
-    unzip \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    python3-dev
 
-# Download and install the correct ChromeDriver version
-RUN CHROMIUM_VERSION=$(chromium --version | grep -oP '\d+\.\d+\.\d+') && \
-    wget https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}/chromedriver_linux64.zip && \
-    unzip chromedriver_linux64.zip -d /usr/local/bin && \
-    rm chromedriver_linux64.zip
-
-# Set the working directory
 WORKDIR /app
-
-# Install Python dependencies
 COPY requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
-
-# Copy packages.txt and install additional system packages
 COPY packages.txt packages.txt
+
 RUN xargs -a packages.txt apt-get install --yes
 
-# Copy the application code
-COPY . .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-# Expose the port for Streamlit
 EXPOSE 8501
 
-# Default command to run the Streamlit app
+COPY . .
+
 CMD ["streamlit", "run", "srt.py"]
+
+# docker build --progress=plain --tag pydub:latest .
+# docker run -ti -p 8501:8501 --rm pydub:latest /bin/bash
+# docker run -ti -p 8501:8501 --rm pydub:latest
+# docker run -ti -p 8501:8501 -v ${pwd}:/app --rm pydub:latest
