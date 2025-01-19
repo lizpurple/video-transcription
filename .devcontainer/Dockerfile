@@ -20,12 +20,13 @@ RUN apt-get update \
     chromium \
     wget \
     curl \
+    unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install the ChromeDriver version that matches Chromium
-RUN CHROMIUM_VERSION=$(chromium --version | sed 's/.* [0-9]*\..*/\1/') && \
-    wget https://chromedriver.storage.googleapis.com/$CHROMIUM_VERSION.0/chromedriver_linux64.zip && \
+# Download and install the correct ChromeDriver version
+RUN CHROMIUM_VERSION=$(chromium --version | grep -oP '\d+\.\d+\.\d+') && \
+    wget https://chromedriver.storage.googleapis.com/${CHROMIUM_VERSION}/chromedriver_linux64.zip && \
     unzip chromedriver_linux64.zip -d /usr/local/bin && \
     rm chromedriver_linux64.zip
 
