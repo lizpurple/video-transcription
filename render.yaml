@@ -3,7 +3,7 @@ services:
     name: flask-app
     env: python
     buildCommand: |
-      apt-get update && apt-get install -y google-chrome-stable
+      apt-get update && apt-get install -y google-chrome-stable ffmpeg
       pip install -r requirements.txt
     startCommand: gunicorn app:app
     plan: free
